@@ -43,13 +43,18 @@ def update_dns_record():
     log.info('Current ipv4: ' + publicIP)
     try:
         records = userClient.get_records(domain, name=a_record, record_type='A')
-        for record in records:
-            if publicIP != record["data"]:
-                updateResult = userClient.update_record_ip(publicIP, domain, a_record, 'A')
-                if updateResult is True:
-                    log.info('Update ended with no Exception.')
-            else:
-                log.info('No DNS update needed.')
+        log.info(records)
+        if len(records):
+            for record in records:
+                if publicIP != record["data"]:
+                    updateResult = userClient.update_record_ip(publicIP, domain, a_record, 'A')
+                    if updateResult is True:
+                        log.info('Update ended with no Exception.')
+                else:
+                    log.info('No DNS update needed.')
+        else:
+            userClient.add_record(domain, {'data':publicIP,'name':a_record,'ttl': 600, 'type':'A'})
+            log.info('DNS created with no Exception ' + a_record + '.' + domain)
     except:
         log.error(sys.exc_info()[1])
         sys.exit()
